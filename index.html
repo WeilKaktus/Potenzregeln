@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potenzen Interaktiv (7. Klasse)</title>
+    <!-- Tailwind CSS laden -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Angepasste Schriftart für Bildungs-Apps */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+        }
+        
+        /* Allgemeine Potenz-Struktur für die Anzeige */
+        .potenz {
+            display: inline-flex;
+            align-items: baseline;
+        }
+        .basis {
+            font-size: 2.5rem; /* Größer für die Basis */
+            font-weight: 700;
+        }
+        .exponent {
+            font-size: 1.5rem; /* Kleiner und hochgestellt */
+            line-height: 1;
+            transform: translateY(-0.5em);
+            display: inline-block;
+        }
+
+        /* STYLES für die EINGABEFELDER */
+        .input-potenz-gruppe {
+            display: flex;
+            align-items: flex-start; /* Oben ausrichten für Exponenten-Look */
+        }
+        .input-basis {
+            /* Input-Feld für die Basis */
+            font-size: 1.5rem;
+            width: 5rem; /* Breiter für die Basis */
+            height: 3rem; 
+            padding: 0.5rem;
+        }
+        .input-exponent {
+            /* Input-Feld für den Exponenten (kleiner und hochgestellt) */
+            font-size: 1rem;
+            width: 3.5rem; /* Schmaler für den Exponenten */
+            height: 2.25rem; 
+            padding: 0.25rem;
+            transform: translateY(-0.6rem); /* Nach oben verschieben, um hochgestellt zu wirken */
+            margin-left: -0.25rem; /* Etwas näher an die Basis rücken */
+        }
+        .input-quiz {
+             /* Input-Feld für das Quiz-Ergebnis */
+            font-size: 1.5rem;
+            width: 6rem; 
+            height: 3rem; 
+            padding: 0.5rem;
+            border-width: 2px;
+        }
+
+        /* MODAL STYLES (Wichtig für das neue Fenster) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        /* Style für das große Alles-Üben-Modal */
+        .big-modal-content {
+            width: 95%;
+            max-width: 1000px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* NEU: Styles für die animierte Mindmap */
+        .mindmap-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .mindmap-box {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .mindmap-line {
+            height: 1rem;
+            width: 2px;
+            background-color: #374151; /* Grau */
+            margin: 0 auto;
+        }
+        .mindmap-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .mindmap-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+
+        /* Kleinere Potenz-Darstellung für den Footer */
+        .potenz-footer .basis {
+            font-size: 1.25rem; 
+        }
+        .potenz-footer .exponent {
+            font-size: 0.8rem;
+        }
+        /* Animation Styles */
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .highlight-red {
+            transition: all 0.3s ease;
+            color: #ef4444; /* Rot */
+            font-weight: 700;
+        }
+        .highlight-green {
+            transition: all 0.3s ease;
+            color: #10b981; /* Grün */
+            font-weight: 700;
+        }
+        .highlight-yellow {
+            transition: all 0.3s ease;
+            color: #f59e0b; /* Gelb (Amber) */
+            font-weight: 700;
+        }
+        /* NEU: Farbe für die neuen Gesetze */
+        .highlight-teal {
+            transition: all 0.3s ease;
+            color: #0d9488; /* Teal */
+            font-weight: 700;
+        }
+        .highlight-sky {
+            transition: all 0.3s ease;
+            color: #0ea5e9; /* Sky */
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-6 md:p-10">
+
+        <!-- Header und Einführung -->
+        <header class="text-center mb-10 border-b-2 border-indigo-200 pb-4">
+            <h1 class="text-4xl font-bold text-indigo-700">Potenzgesetze Interaktiv</h1>
+            <p class="mt-2 text-xl text-gray-600">Alle 5 Gesetze für Potenzen (7. Klasse)</p>
+        </header>
+
+        <!-- Sektion 1: Multiplikation (Gleiche Basis) -->
+        <section class="mb-12 p-6 bg-indigo-50 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-indigo-600 mb-4 flex items-center">
+                <span class="mr-3 text-3xl">✖️</span> 
+                Multiplikation: Exponenten addieren (Gleiche Basis)
+            </h2>
+            <p class="mb-4 text-gray-700">Gib eine **Basis** und zwei **Exponenten** ein, um zu sehen, wie die Exponenten **addiert** werden.</p>
+
+            <!-- Eingabebereich Multiplikation (LAYOUT) -->
+            <div class="flex flex-wrap gap-4 items-center justify-center p-4 bg-white rounded-lg shadow-inner">
+                
+                <!-- Potenz 1 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base_mult" value="2" min="2" max="10" class="input-basis p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="exp1_mult" value="3" min="1" max="5" class="input-exponent p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="m">
+                </div>
+                
+                <span class="text-3xl font-extrabold text-indigo-600 mx-2">⋅</span>
+                
+                <!-- Potenz 2 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base_mult_check" value="2" min="2" max="10" disabled class="input-basis p-2 border-2 border-gray-200 rounded-lg text-center font-mono bg-gray-100" title="Basis muss gleich sein">
+                    <input type="number" id="exp2_mult" value="2" min="1" max="5" class="input-exponent p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="n">
+                </div>
+            </div>
+
+            <!-- Visualisierung Multiplikation -->
+            <div id="mult_animation" class="mt-6 p-4 bg-white border-2 border-indigo-300 rounded-xl min-h-[150px] flex flex-col justify-center items-center text-lg md:text-xl text-gray-800">
+                <p class="text-gray-500">Gleichung und Animation erscheinen hier...</p>
+            </div>
+            <button onclick="calculateMultiplication()" class="mt-4 w-full bg-indigo-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-indigo-600 transition shadow-md">
+                Animation zeigen
+            </button>
+
+            <!-- ÜBUNGSBUTTON 1 -->
+            <button onclick="openQuizModal('multGB')" class="mt-2 w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition shadow-md">
+                Übungsaufgabe starten
+            </button>
+        </section>
+
+        <!-- Sektion 2: Division (Gleiche Basis) -->
+        <section class="mb-12 p-6 bg-green-50 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-green-600 mb-4 flex items-center">
+                <span class="mr-3 text-3xl">➗</span> 
+                Division: Exponenten subtrahieren (Gleiche Basis)
+            </h2>
+            <p class="mb-4 text-gray-700">Gib eine **Basis** und zwei **Exponenten** ein, um zu sehen, wie die Exponenten **subtrahiert** werden. (Wähle den Exponenten oben größer oder gleich dem unten)</p>
+
+            <!-- Eingabebereich Division (LAYOUT) -->
+            <div class="flex flex-wrap gap-4 items-center justify-center p-4 bg-white rounded-lg shadow-inner">
+                
+                <!-- Potenz 1 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base_div" value="2" min="2" max="10" class="input-basis p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="exp1_div" value="5" min="2" max="5" class="input-exponent p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="m">
+                </div>
+                
+                <span class="text-3xl font-extrabold text-green-600 mx-2">/</span>
+                
+                <!-- Potenz 2 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base_div_check" value="2" min="2" max="10" disabled class="input-basis p-2 border-2 border-gray-200 rounded-lg text-center font-mono bg-gray-100" title="Basis muss gleich sein">
+                    <input type="number" id="exp2_div" value="3" min="1" max="4" class="input-exponent p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="n">
+                </div>
+            </div>
+
+            <!-- Visualisierung Division -->
+            <div id="div_animation" class="mt-6 p-4 bg-white border-2 border-green-300 rounded-xl min-h-[150px] flex flex-col justify-center items-center text-lg md:text-xl text-gray-800">
+                <p class="text-gray-500">Gleichung und Animation erscheinen hier...</p>
+            </div>
+            <button onclick="calculateDivision()" class="mt-4 w-full bg-green-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition shadow-md">
+                Animation zeigen
+            </button>
+            
+            <!-- ÜBUNGSBUTTON 2 -->
+            <button onclick="openQuizModal('divGB')" class="mt-2 w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition shadow-md">
+                Übungsaufgabe starten
+            </button>
+        </section>
+
+        <!-- Sektion 3: Potenzieren von Potenzen -->
+        <section class="mb-12 p-6 bg-yellow-50 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-yellow-600 mb-4 flex items-center">
+                <span class="mr-3 text-3xl">⚙️</span>
+                Potenzen potenzieren: Exponenten multiplizieren
+            </h2>
+            <p class="mb-4 text-gray-700">Gib eine **Basis** und zwei **Exponenten** ein, um zu sehen, wie die Exponenten **multipliziert** werden.</p>
+
+            <!-- Eingabebereich Potenzieren von Potenzen (LAYOUT) -->
+            <div class="flex flex-wrap gap-4 items-center justify-center p-4 bg-white rounded-lg shadow-inner">
+
+                <!-- (a^m) -->
+                <div class="input-potenz-gruppe border-2 border-yellow-300 rounded-lg p-2">
+                    <span class="text-3xl text-gray-500 mr-1 font-extrabold">(</span>
+                    <div class="input-potenz-gruppe">
+                        <input type="number" id="base_pop" value="2" min="2" max="5" class="input-basis p-2 border-2 border-yellow-300 rounded-lg text-center font-mono focus:border-yellow-500 transition" placeholder="Basis (a)">
+                        <input type="number" id="exp1_pop" value="3" min="1" max="3" class="input-exponent p-2 border-2 border-yellow-300 rounded-lg text-center font-mono focus:border-yellow-500 transition" placeholder="m">
+                    </div>
+                    <span class="text-3xl text-gray-500 ml-1 font-extrabold">)</span>
+                </div>
+
+                <!-- ^n (Äußerer Exponent) -->
+                <div class="input-potenz-gruppe transform -translate-y-4">
+                    <input type="number" id="exp2_pop" value="2" min="2" max="4" class="input-exponent p-2 border-2 border-yellow-300 rounded-lg text-center font-mono focus:border-yellow-500 transition" placeholder="n">
+                </div>
+            </div>
+
+            <!-- Visualisierung Potenzieren von Potenzen -->
+            <div id="pop_animation" class="mt-6 p-4 bg-white border-2 border-yellow-300 rounded-xl min-h-[150px] flex flex-col justify-center items-center text-lg md:text-xl text-gray-800">
+                <p class="text-gray-500">Gleichung und Animation erscheinen hier...</p>
+            </div>
+            <button onclick="calculatePowerOfPower()" class="mt-4 w-full bg-yellow-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-yellow-600 transition shadow-md">
+                Animation zeigen
+            </button>
+            
+            <!-- ÜBUNGSBUTTON 3 -->
+            <button onclick="openQuizModal('pop')" class="mt-2 w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition shadow-md">
+                Übungsaufgabe starten
+            </button>
+        </section>
+        
+        <!-- NEUE SEKTION 4: Multiplikation (Gleicher Exponent) -->
+        <section class="mb-12 p-6 bg-teal-50 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+                <span class="mr-3 text-3xl">⭐</span> 
+                Multiplikation: Basen multiplizieren (Gleicher Exponent)
+            </h2>
+            <p class="mb-4 text-gray-700">Gib zwei **Basen** und einen **Exponenten** ein, um zu sehen, wie die Basen **multipliziert** und der Exponent beibehalten wird.</p>
+
+            <!-- Eingabebereich Multiplikation (GLEICHER EXPONENT) -->
+            <div class="flex flex-wrap gap-4 items-center justify-center p-4 bg-white rounded-lg shadow-inner">
+                
+                <!-- Potenz 1 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base1_mult_exp" value="2" min="2" max="5" class="input-basis p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="exp_mult_exp1" value="3" min="1" max="3" class="input-exponent p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="n">
+                </div>
+                
+                <span class="text-3xl font-extrabold text-teal-600 mx-2">⋅</span>
+                
+                <!-- Potenz 2 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base2_mult_exp" value="3" min="2" max="5" class="input-basis p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="Basis (b)">
+                    <input type="number" id="exp_mult_exp2" value="3" min="1" max="3" disabled class="input-exponent p-2 border-2 border-gray-200 rounded-lg text-center font-mono bg-gray-100" title="Exponent muss gleich sein">
+                </div>
+            </div>
+
+            <!-- Visualisierung Multiplikation -->
+            <div id="mult_exp_animation" class="mt-6 p-4 bg-white border-2 border-teal-300 rounded-xl min-h-[150px] flex flex-col justify-center items-center text-lg md:text-xl text-gray-800">
+                <p class="text-gray-500">Gleichung und Animation erscheinen hier...</p>
+            </div>
+            <button onclick="calculateMultSameExp()" class="mt-4 w-full bg-teal-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-teal-600 transition shadow-md">
+                Animation zeigen
+            </button>
+            
+            <!-- ÜBUNGSBUTTON 4 -->
+            <button onclick="openQuizModal('multGE')" class="mt-2 w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition shadow-md">
+                Übungsaufgabe starten
+            </button>
+        </section>
+
+        <!-- NEUE SEKTION 5: Division (Gleicher Exponent) -->
+        <section class="p-6 bg-sky-50 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-sky-600 mb-4 flex items-center">
+                <span class="mr-3 text-3xl">🌐</span> 
+                Division: Basen dividieren (Gleicher Exponent)
+            </h2>
+            <p class="mb-4 text-gray-700">Gib zwei **Basen** und einen **Exponenten** ein, um zu sehen, wie die Basen **dividiert** und der Exponent beibehalten wird. (Wähle die Basen so, dass eine glatte Division möglich ist, z.B. 6 und 2)</p>
+
+            <!-- Eingabebereich Division (GLEICHER EXPONENT) -->
+            <div class="flex flex-wrap gap-4 items-center justify-center p-4 bg-white rounded-lg shadow-inner">
+                
+                <!-- Potenz 1 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base1_div_exp" value="6" min="2" max="10" class="input-basis p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="exp_div_exp1" value="2" min="1" max="3" class="input-exponent p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="n">
+                </div>
+                
+                <span class="text-3xl font-extrabold text-sky-600 mx-2">/</span>
+                
+                <!-- Potenz 2 -->
+                <div class="input-potenz-gruppe">
+                    <input type="number" id="base2_div_exp" value="3" min="1" max="5" class="input-basis p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="Basis (b)">
+                    <input type="number" id="exp_div_exp2" value="2" min="1" max="3" disabled class="input-exponent p-2 border-2 border-gray-200 rounded-lg text-center font-mono bg-gray-100" title="Exponent muss gleich sein">
+                </div>
+            </div>
+
+            <!-- Visualisierung Division -->
+            <div id="div_exp_animation" class="mt-6 p-4 bg-white border-2 border-sky-300 rounded-xl min-h-[150px] flex flex-col justify-center items-center text-lg md:text-xl text-gray-800">
+                <p class="text-gray-500">Gleichung und Animation erscheinen hier...</p>
+            </div>
+            <button onclick="calculateDivSameExp()" class="mt-4 w-full bg-sky-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-sky-600 transition shadow-md">
+                Animation zeigen
+            </button>
+            
+            <!-- ÜBUNGSBUTTON 5 -->
+            <button onclick="openQuizModal('divGE')" class="mt-2 w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition shadow-md">
+                Übungsaufgabe starten
+            </button>
+        </section>
+
+        
+        <!-- Fußnote mit der allgemeinen Regel -->
+        <footer class="mt-10 pt-4 border-t-2 border-gray-200 text-center text-sm">
+            <p class="mt-2 text-base font-semibold text-gray-700">Die 5 Regeln im Überblick:</p>
+            <div class="flex flex-wrap justify-center items-center space-y-2 md:space-y-0 md:space-x-4 text-gray-600">
+                
+                <!-- 1. Multiplikation (Gleiche Basis): a^m * a^n = a^(m+n) -->
+                <p class="text-sm md:text-base flex items-baseline">
+                    (GB ⋅) <span class="potenz potenz-footer"><span class="basis">a</span><span class="exponent">m+n</span></span>
+                </p>
+                
+                <!-- 2. Division (Gleiche Basis): a^m / a^n = a^(m-n) -->
+                <p class="text-sm md:text-base flex items-baseline">
+                    (GB /) <span class="potenz potenz-footer"><span class="basis">a</span><span class="exponent">m-n</span></span>
+                </p>
+
+                <!-- 3. Potenzieren von Potenzen: (a^m)^n = a^(m*n) -->
+                <p class="text-sm md:text-base flex items-baseline">
+                    (PoP) <span class="potenz potenz-footer text-yellow-600"><span class="basis">a</span><span class="exponent">m⋅n</span></span>
+                </p>
+                
+                <!-- 4. Multiplikation (Gleicher Exponent): a^n * b^n = (a*b)^n -->
+                <p class="text-sm md:text-base flex items-baseline">
+                    (GE ⋅) <span class="potenz potenz-footer text-teal-600"><span class="basis">(a⋅b)</span><span class="exponent">n</span></span>
+                </p>
+
+                <!-- 5. Division (Gleicher Exponent): a^n / b^n = (a/b)^n -->
+                <p class="text-sm md:text-base flex items-baseline">
+                    (GE /) <span class="potenz potenz-footer text-sky-600"><span class="basis">(a/b)</span><span class="exponent">n</span></span>
+                </p>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">GB = Gleiche Basis, GE = Gleicher Exponent, PoP = Potenzieren von Potenzen.</p>
+        </footer>
+        
+        <!-- NEUER GLOBALER BUTTON -->
+        <div class="mt-10 pt-4 border-t-2 border-pink-200">
+             <button onclick="openAllQuizModal()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-extrabold text-xl hover:bg-purple-700 transition shadow-lg">
+                🚀 Alles Üben (Zufalls-Quiz)
+            </button>
+        </div>
+
+
+    </div>
+    
+    <!-- MODAL HALTER FÜR DIE EINZELÜBUNGEN -->
+    <div id="quiz_modal_container" class="modal-overlay hidden">
+        <div id="quiz_modal_content" class="modal-content">
+            <h3 id="modal_title" class="text-2xl font-bold text-pink-700 mb-4 border-b pb-2">Potenz-Übung</h3>
+            <div id="quiz_problem_display" class="text-2xl font-bold mb-4 flex items-baseline justify-center"></div>
+            
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <p class="font-semibold text-gray-700">Gib den Exponenten oder die Basis des Ergebnisses ein:</p>
+                
+                <input type="number" id="current_quiz_answer" class="input-quiz border-pink-500 rounded-lg text-center font-mono transition duration-300 focus:ring-4 focus:ring-pink-200" placeholder="?">
+                
+                <div class="flex space-x-4">
+                    <button onclick="checkCurrentQuiz()" class="bg-pink-600 text-white py-2 px-6 rounded-xl font-bold hover:bg-pink-700 transition shadow-md">Prüfen</button>
+                    <button onclick="closeQuizModal()" class="bg-gray-400 text-white py-2 px-6 rounded-xl font-bold hover:bg-gray-500 transition shadow-md">Schließen</button>
+                </div>
+                
+                <p id="current_quiz_feedback" class="mt-3 text-center font-semibold text-lg min-h-[1.5rem]"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL HALTER FÜR DIE ALLES-ÜBEN-FUNKTION (Mindmap + Zufalls-Quiz) -->
+    <div id="all_quiz_modal_container" class="modal-overlay hidden">
+        <div class="big-modal-content bg-white p-6 rounded-xl shadow-2xl overflow-y-auto">
+            <h3 class="text-3xl font-bold text-purple-700 mb-4 border-b pb-2">🧠 Alle Regeln im Überblick & Üben</h3>
+            
+            <!-- Animierte Mindmap Sektion WIRD GELÖSCHT -->
+            <div class="mb-6">
+                <h4 class="text-xl font-semibold text-gray-700 mb-3">1. Wiederholung: Mindmap der Potenzgesetze</h4>
+                
+                <div id="mindmap_animation_area" class="w-full bg-gray-50 border-2 border-purple-300 rounded-lg p-4 mb-6 min-h-[300px] flex flex-col justify-center items-center">
+                    <!-- Platzhalter für die animierte Mindmap -->
+                </div>
+                <button onclick="startMindmapAnimation()" class="bg-purple-400 text-white py-2 px-4 rounded-lg font-bold hover:bg-purple-500 transition w-full md:w-auto">
+                    Mindmap animiert zeigen
+                </button>
+            </div>
+
+            <!-- Zufalls-Quiz Sektion -->
+            <div class="bg-purple-50 p-4 rounded-lg flex-grow flex flex-col justify-center items-center mt-4">
+                <h4 class="text-xl font-semibold text-purple-700 mb-4">2. Zufällige Übung aus allen 5 Gesetzen</h4>
+                
+                <div id="all_quiz_problem_display" class="text-3xl font-bold mb-6 flex items-baseline justify-center min-h-[4rem]">
+                    Klicke auf "Neue Aufgabe"!
+                </div>
+                
+                <div class="flex flex-col items-center justify-center space-y-4 w-full max-w-sm">
+                    <p class="font-semibold text-gray-700">Gib dein Ergebnis (Exponent oder Basis) ein:</p>
+                    <input type="number" id="all_quiz_answer" class="input-quiz border-purple-500 rounded-lg text-center font-mono transition duration-300 focus:ring-4 focus:ring-purple-200" placeholder="?">
+                    
+                    <div class="flex space-x-4 w-full justify-center">
+                        <button onclick="startRandomQuiz()" class="bg-purple-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-purple-700 transition shadow-md">Neue Aufgabe</button>
+                        <button onclick="checkRandomQuiz()" class="bg-pink-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-pink-700 transition shadow-md">Prüfen</button>
+                    </div>
+                    
+                    <p id="all_quiz_feedback" class="mt-3 text-center font-semibold text-lg min-h-[1.5rem]"></p>
+                </div>
+            </div>
+            
+            <button onclick="closeAllQuizModal()" class="mt-6 bg-gray-400 text-white py-3 rounded-xl font-bold hover:bg-gray-500 transition shadow-md">
+                Modal schließen
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // ==============================================
+        // Globale Variablen & Helfer
+        // ==============================================
+        let correctAnswers = {}; // Speichert die korrekten Antworten {quizName: correctAnswer}
+        let currentQuizName = ''; // Speichert den Namen des aktuell geöffneten Quiz (für Einzel-Quiz)
+        let currentRandomQuizType = ''; // Speichert den Typ des aktuell aktiven Zufalls-Quiz (z.B. 'multGB')
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generatePotenzHtml(basis, exponent, colorClass = 'text-pink-700') {
+            return `<span class="potenz"><span class="basis ${colorClass}">${basis}</span><span class="exponent ${colorClass}">${exponent}</span></span>`;
+        }
+
+        // Funktion zur Synchronisierung der Basen/Exponenten (muss gleich sein)
+        function syncInputs() {
+            document.getElementById('base_mult_check').value = document.getElementById('base_mult').value;
+            document.getElementById('base_div_check').value = document.getElementById('base_div').value;
+            document.getElementById('exp_mult_exp2').value = document.getElementById('exp_mult_exp1').value;
+            document.getElementById('exp_div_exp2').value = document.getElementById('exp_div_exp1').value;
+        }
+
+        // ==============================================
+        // ANIMIERTE MINDMAP LOGIK (GELÖSCHT)
+        // ==============================================
+        const mindmapArea = document.getElementById('mindmap_animation_area');
+
+        // Mindmap Daten entfernt
+
+        function startMindmapAnimation() {
+            // Funktion entfernt, nur Feedback
+            mindmapArea.innerHTML = `<p class="text-red-500 font-bold">Mindmap-Animation wurde entfernt, um die Übersichtlichkeit zu erhöhen.</p>`;
+        }
+
+        // ==============================================
+        // MODAL LOGIK
+        // ==============================================
+        const modalContainer = document.getElementById('quiz_modal_container');
+        const allModalContainer = document.getElementById('all_quiz_modal_container');
+        const quizProblemDisplay = document.getElementById('quiz_problem_display');
+        const quizAnswerInput = document.getElementById('current_quiz_answer');
+        const quizFeedback = document.getElementById('current_quiz_feedback');
+        const modalTitle = document.getElementById('modal_title');
+        
+        const allQuizProblemDisplay = document.getElementById('all_quiz_problem_display');
+        const allQuizAnswerInput = document.getElementById('all_quiz_answer');
+        const allQuizFeedback = document.getElementById('all_quiz_feedback');
+
+        
+        // Allgemeine Schließen-Funktionen
+        function closeQuizModal() {
+            modalContainer.classList.add('hidden');
+            currentQuizName = '';
+        }
+        function closeAllQuizModal() {
+            allModalContainer.classList.add('hidden');
+            currentRandomQuizType = '';
+        }
+        
+        // Einzel-Quiz Modal öffnen
+        function openQuizModal(quizName) {
+            currentQuizName = quizName;
+            
+            // Titel anpassen
+            const titles = {
+                'multGB': 'Multiplikation (Gleiche Basis)',
+                'divGB': 'Division (Gleiche Basis)',
+                'pop': 'Potenzen potenzieren',
+                'multGE': 'Multiplikation (Gleicher Exponent)',
+                'divGE': 'Division (Gleicher Exponent)',
+            };
+            modalTitle.textContent = titles[quizName] || 'Potenz-Übung';
+
+            // Quiz vorbereiten
+            quizAnswerInput.value = '';
+            quizFeedback.innerHTML = '';
+            quizAnswerInput.style.borderColor = '#ec4899'; // Pink-500
+
+            // Richtige Quiz-Funktion aufrufen
+            switch(quizName) {
+                case 'multGB': startQuizMultGB(quizProblemDisplay, 'multGB'); break;
+                case 'divGB': startQuizDivGB(quizProblemDisplay, 'divGB'); break;
+                case 'pop': startQuizPoP(quizProblemDisplay, 'pop'); break;
+                case 'multGE': startQuizMultGE(quizProblemDisplay, 'multGE'); break;
+                case 'divGE': startQuizDivGE(quizProblemDisplay, 'divGE'); break;
+            }
+
+            modalContainer.classList.remove('hidden');
+            quizAnswerInput.focus();
+        }
+        
+        // Alle-Üben-Modal öffnen
+        function openAllQuizModal() {
+            allModalContainer.classList.remove('hidden');
+            // Die Animation wurde entfernt, daher direkter Start des Quiz
+            allQuizProblemDisplay.innerHTML = 'Starte mit "Neue Aufgabe" die erste Zufalls-Übung!';
+            allQuizAnswerInput.value = '';
+            allQuizFeedback.innerHTML = '';
+            allQuizAnswerInput.focus();
+
+            // Sektion für Mindmap im All-Quiz-Modal entfernen/verstecken
+            const mindmapSection = document.querySelector('#all_quiz_modal_container > div > div:nth-child(2)');
+            if (mindmapSection) {
+                mindmapSection.classList.add('hidden');
+            }
+        }
+
+        // ==============================================
+        // QUIZ PRÜFUNG LOGIK
+        // ==============================================
+        
+        function checkCurrentQuiz() {
+            // Wird für die Einzel-Quiz verwendet
+            checkAnswer(currentQuizName, quizAnswerInput, quizFeedback);
+            // Neue Aufgabe generieren bei Korrektheit, damit man sofort weiter üben kann
+            if (quizFeedback.innerHTML.includes('Korrekt!')) {
+                setTimeout(() => openQuizModal(currentQuizName), 2000); 
+            }
+        }
+        
+        function checkRandomQuiz() {
+            // Wird für das "Alles Üben" Quiz verwendet
+            if (!currentRandomQuizType) {
+                 allQuizFeedback.className = 'mt-3 text-center font-semibold text-red-500';
+                 allQuizFeedback.innerHTML = 'Bitte zuerst auf "Neue Aufgabe" klicken.';
+                 return;
+            }
+            checkAnswer(currentRandomQuizType, allQuizAnswerInput, allQuizFeedback);
+            
+             // Neue Zufalls-Aufgabe generieren bei Korrektheit
+            if (allQuizFeedback.innerHTML.includes('Korrekt!')) {
+                setTimeout(startRandomQuiz, 2000);
+            }
+        }
+
+        function checkAnswer(quizName, answerInputEl, feedbackEl) {
+            const userAnswer = parseInt(answerInputEl.value);
+            const correctAnswer = correctAnswers[quizName];
+            
+            answerInputEl.style.borderColor = '#ec4899'; // Reset
+
+            if (isNaN(userAnswer)) {
+                feedbackEl.className = 'mt-3 text-center font-semibold text-red-500';
+                feedbackEl.innerHTML = 'Bitte eine Zahl eingeben.';
+                return;
+            }
+            
+            const isExponentResult = ['multGB', 'divGB', 'pop'].includes(quizName);
+
+            if (userAnswer === correctAnswer) {
+                feedbackEl.className = 'mt-3 text-center font-semibold text-green-600';
+                feedbackEl.innerHTML = 'Korrekt! ✅';
+                answerInputEl.style.borderColor = '#10b981'; // Grün
+            } else {
+                let hintText = isExponentResult 
+                    ? `Falsch. Denk an die Regel: Exponenten ${quizName.includes('mult') || quizName.includes('pop') ? 'addieren/multiplizieren' : 'subtrahieren'}.`
+                    : `Falsch. Denk an die Regel: Basen multiplizieren/dividieren und Exponent beibehalten.`;
+                
+                feedbackEl.className = 'mt-3 text-center font-semibold text-red-600';
+                feedbackEl.innerHTML = `${hintText} Die korrekte Antwort war **${correctAnswer}**.`;
+                answerInputEl.style.borderColor = '#ef4444'; // Rot
+            }
+        }
+
+
+        // ==============================================
+        // QUIZ GENERATOREN
+        // ==============================================
+
+        // 1. Multiplikation (Gleiche Basis): a^m * a^n = a^(m+n)
+        function startQuizMultGB(displayEl, quizName) {
+            const a = getRandomInt(2, 5);
+            const m = getRandomInt(2, 4);
+            const n = getRandomInt(2, 4);
+            correctAnswers[quizName] = m + n;
+
+            displayEl.innerHTML = `
+                ${generatePotenzHtml(a, m)} 
+                <span class="text-3xl mx-2">⋅</span> 
+                ${generatePotenzHtml(a, n)} 
+                <span class="text-3xl mx-2">=</span> 
+                ${generatePotenzHtml(a, ' ? ')}
+            `;
+        }
+
+
+        // 2. Division (Gleiche Basis): a^m / a^n = a^(m-n)
+        function startQuizDivGB(displayEl, quizName) {
+            const a = getRandomInt(2, 5);
+            const m = getRandomInt(5, 8);
+            const n = getRandomInt(2, 4);
+            correctAnswers[quizName] = m - n;
+
+            displayEl.innerHTML = `
+                ${generatePotenzHtml(a, m)} 
+                <span class="text-3xl mx-2">/</span> 
+                ${generatePotenzHtml(a, n)} 
+                <span class="text-3xl mx-2">=</span> 
+                ${generatePotenzHtml(a, ' ? ')}
+            `;
+        }
+
+
+        // 3. Potenzieren von Potenzen: (a^m)^n = a^(m*n)
+        function startQuizPoP(displayEl, quizName) {
+            const a = getRandomInt(2, 4);
+            const m = getRandomInt(2, 3);
+            const n = getRandomInt(2, 3);
+            correctAnswers[quizName] = m * n;
+
+            displayEl.innerHTML = `
+                (<span class="potenz"><span class="basis text-pink-700">${a}</span><span class="exponent text-pink-700">${m}</span></span>)<span class="exponent text-pink-700">${n}</span>
+                <span class="text-3xl mx-2">=</span> 
+                ${generatePotenzHtml(a, ' ? ')}
+            `;
+        }
+
+
+        // 4. Multiplikation (Gleicher Exponent): a^n * b^n = (a*b)^n -> Basis Ergebnis gefragt
+        function startQuizMultGE(displayEl, quizName) {
+            const a = getRandomInt(2, 5);
+            const b = getRandomInt(2, 4);
+            const n = getRandomInt(2, 3);
+            correctAnswers[quizName] = a * b;
+
+            displayEl.innerHTML = `
+                ${generatePotenzHtml(a, n)} 
+                <span class="text-3xl mx-2">⋅</span> 
+                ${generatePotenzHtml(b, n)} 
+                <span class="text-3xl mx-2">=</span> 
+                <span class="text-3xl mx-0.5">(<span class="basis text-pink-700">?</span>)</span>
+                <span class="exponent text-pink-700">${n}</span>
+            `;
+        }
+
+
+        // 5. Division (Gleicher Exponent): a^n / b^n = (a/b)^n -> Basis Ergebnis gefragt
+        function startQuizDivGE(displayEl, quizName) {
+            let a, b;
+            // Sicherstellen, dass a durch b teilbar ist
+            do {
+                b = getRandomInt(2, 4);
+                a = getRandomInt(b * 2, b * 4); 
+            } while (a % b !== 0);
+
+            const n = getRandomInt(2, 3);
+            correctAnswers[quizName] = a / b;
+
+            displayEl.innerHTML = `
+                ${generatePotenzHtml(a, n)} 
+                <span class="text-3xl mx-2">/</span> 
+                ${generatePotenzHtml(b, n)} 
+                <span class="text-3xl mx-2">=</span> 
+                <span class="text-3xl mx-0.5">(<span class="basis text-pink-700">?</span>)</span>
+                <span class="exponent text-pink-700">${n}</span>
+            `;
+        }
+        
+        // ==============================================
+        // ZUFALLS-QUIZ LOGIK (FÜR "ALLES ÜBEN")
+        // ==============================================
+        
+        function startRandomQuiz() {
+            // Liste aller Quiz-Typen
+            const quizTypes = ['multGB', 'divGB', 'pop', 'multGE', 'divGE'];
+            // Zufälligen Quiz-Typ auswählen
+            const randomType = quizTypes[Math.floor(Math.random() * quizTypes.length)];
+            currentRandomQuizType = randomType;
+
+            // Problem und Feedback zurücksetzen
+            allQuizAnswerInput.value = '';
+            allQuizFeedback.innerHTML = '';
+            allQuizAnswerInput.style.borderColor = '#9333ea'; // Lila für den All-Quiz-Bereich
+
+            // Entsprechende Generator-Funktion aufrufen (mit den IDs für das All-Quiz-Modal)
+            switch (randomType) {
+                case 'multGB': startQuizMultGB(allQuizProblemDisplay, randomType); break;
+                case 'divGB': startQuizDivGB(allQuizProblemDisplay, randomType); break;
+                case 'pop': startQuizPoP(allQuizProblemDisplay, randomType); break;
+                case 'multGE': startQuizMultGE(allQuizProblemDisplay, randomType); break;
+                case 'divGE': startQuizDivGE(allQuizProblemDisplay, randomType); break;
+            }
+        }
+        
+        
+        // ==============================================
+        // ANIMATION LOGIK (Unverändert)
+        // ==============================================
+
+        // DOM-Elemente für alle Sektionen
+        const baseMultEl = document.getElementById('base_mult');
+        const baseMultCheckEl = document.getElementById('base_mult_check');
+        const exp1MultEl = document.getElementById('exp1_mult');
+        const exp2MultEl = document.getElementById('exp2_mult');
+        const multAnimationEl = document.getElementById('mult_animation');
+
+        const baseDivEl = document.getElementById('base_div');
+        const baseDivCheckEl = document.getElementById('base_div_check');
+        const exp1DivEl = document.getElementById('exp1_div');
+        const exp2DivEl = document.getElementById('exp2_div');
+        const divAnimationEl = document.getElementById('div_animation');
+
+        const basePopEl = document.getElementById('base_pop');
+        const exp1PopEl = document.getElementById('exp1_pop');
+        const exp2PopEl = document.getElementById('exp2_pop');
+        const popAnimationEl = document.getElementById('pop_animation');
+
+        const base1MultExpEl = document.getElementById('base1_mult_exp');
+        const base2MultExpEl = document.getElementById('base2_mult_exp');
+        const expMultExp1El = document.getElementById('exp_mult_exp1');
+        const expMultExp2El = document.getElementById('exp_mult_exp2');
+        const multExpAnimationEl = document.getElementById('mult_exp_animation');
+
+        const base1DivExpEl = document.getElementById('base1_div_exp');
+        const base2DivExpEl = document.getElementById('base2_div_exp');
+        const expDivExp1El = document.getElementById('exp_div_exp1');
+        const expDivExp2El = document.getElementById('exp_div_exp2');
+        const divExpAnimationEl = document.getElementById('div_exp_animation');
+
+
+        // =========================================================================
+        // Sektion 1: Multiplikation (Gleiche Basis)
+        // =========================================================================
+        function calculateMultiplication() {
+            const a = parseInt(baseMultEl.value);
+            const m = parseInt(exp1MultEl.value);
+            const n = parseInt(exp2MultEl.value);
+
+            if (isNaN(a) || isNaN(m) || isNaN(n) || m < 1 || n < 1 || a < 2) {
+                multAnimationEl.innerHTML = `<p class="text-red-500 font-bold">Bitte gültige Zahlen eingeben (Basis mindestens 2, Exponenten mindestens 1).</p>`;
+                return;
+            }
+
+            multAnimationEl.innerHTML = `<p class="text-xl font-bold text-indigo-700">Starte Animation...</p>`;
+
+            setTimeout(() => {
+                multAnimationEl.innerHTML = `
+                    <p class="slide-in">
+                        <span class="potenz"><span class="basis">${a}</span><span class="exponent">${m}</span></span>
+                        <span class="text-3xl mx-2">⋅</span>
+                        <span class="potenz"><span class="basis">${a}</span><span class="exponent">${n}</span></span>
+                    </p>
+                `;
+            }, 500);
+
+            setTimeout(() => {
+                const productM = Array(m).fill(a).join(' ⋅ ');
+                const productN = Array(n).fill(a).join(' ⋅ ');
+                
+                multAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = (${productM}) ⋅ (${productN})
+                    </p>
+                `;
+            }, 2000);
+
+            setTimeout(() => {
+                const totalA = Array(m + n).fill(`<span class="highlight-green">${a}</span>`).join(' ⋅ ');
+                multAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = ${totalA}
+                    </p>
+                `;
+            }, 4000);
+
+            setTimeout(() => {
+                const finalExp = `<span class="highlight-red">${m} + ${n}</span>`;
+                const finalResult = `<span class="highlight-green">${m + n}</span>`;
+
+                multAnimationEl.innerHTML += `
+                    <p class="slide-in mt-6 text-2xl font-bold">
+                        &rArr; <span class="basis">${a}</span><span class="exponent">${finalExp}</span>
+                        = <span class="basis">${a}</span><span class="exponent">${finalResult}</span>
+                    </p>
+                    <p class="slide-in mt-2 text-indigo-700 font-semibold text-lg">
+                        REGEL: Exponenten <span class="highlight-red">addieren</span>!
+                    </p>
+                `;
+            }, 6000);
+        }
+
+        // =========================================================================
+        // Sektion 2: Division (Gleiche Basis)
+        // =========================================================================
+        function calculateDivision() {
+            const a = parseInt(baseDivEl.value);
+            const m = parseInt(exp1DivEl.value);
+            const n = parseInt(exp2DivEl.value);
+
+            if (isNaN(a) || isNaN(m) || isNaN(n) || m < 2 || n < 1 || a < 2 || m < n) {
+                divAnimationEl.innerHTML = `<p class="text-red-500 font-bold">Bitte gültige Zahlen eingeben (Basis mindestens 2. Achte darauf, dass m größer oder gleich n ist).</p>`;
+                return;
+            }
+
+            divAnimationEl.innerHTML = `<p class="text-xl font-bold text-green-700">Starte Animation...</p>`;
+
+            setTimeout(() => {
+                divAnimationEl.innerHTML = `
+                    <div class="slide-in flex flex-col items-center">
+                        <span class="potenz text-2xl"><span class="basis">${a}</span><span class="exponent">${m}</span></span>
+                        <div class="h-1 w-20 bg-green-600 my-1"></div>
+                        <span class="potenz text-2xl"><span class="basis">${a}</span><span class="exponent">${n}</span></span>
+                    </div>
+                `;
+            }, 500);
+
+            setTimeout(() => {
+                const numerator = Array(m).fill(a).join(' ⋅ ');
+                const denominator = Array(n).fill(a).join(' ⋅ ');
+
+                divAnimationEl.innerHTML += `
+                    <div class="slide-in flex flex-col items-center mt-4 text-base md:text-lg">
+                        =
+                        <span class="mt-2">${numerator}</span>
+                        <div class="h-1 w-48 bg-gray-400 my-1"></div>
+                        <span>${denominator}</span>
+                    </div>
+                `;
+            }, 2000);
+
+            setTimeout(() => {
+                const remainingExp = m - n;
+                let num_parts = [];
+                let den_parts = [];
+                
+                for (let i = 0; i < n; i++) {
+                    num_parts.push(`<s class="highlight-red">${a}</s>`);
+                    den_parts.push(`<s class="highlight-red">${a}</s>`);
+                }
+                
+                for (let i = 0; i < remainingExp; i++) {
+                    num_parts.push(a);
+                }
+
+                divAnimationEl.innerHTML += `
+                    <div class="slide-in flex flex-col items-center mt-4 text-base md:text-lg">
+                        <span class="text-green-700 font-bold">KÜRZEN:</span>
+                        <span class="mt-2">${num_parts.join(' ⋅ ')}</span>
+                        <div class="h-1 w-48 bg-gray-400 my-1"></div>
+                        <span>${den_parts.join(' ⋅ ')}</span>
+                    </div>
+                `;
+            }, 4000);
+
+            setTimeout(() => {
+                const finalExp = `<span class="highlight-red">${m} - ${n}</span>`;
+                const finalResult = `<span class="highlight-green">${m - n}</span>`;
+
+                divAnimationEl.innerHTML += `
+                    <p class="slide-in mt-6 text-2xl font-bold">
+                        &rArr; <span class="basis">${a}</span><span class="exponent">${finalExp}</span>
+                        = <span class="basis">${a}</span><span class="exponent">${finalResult}</span>
+                    </p>
+                    <p class="slide-in mt-2 text-green-700 font-semibold text-lg">
+                        REGEL: Exponenten <span class="highlight-red">subtrahieren</span>!
+                    </p>
+                `;
+            }, 6500);
+        }
+
+        // =========================================================================
+        // Sektion 3: Potenzieren von Potenzen
+        // =========================================================================
+        function calculatePowerOfPower() {
+            const a = parseInt(basePopEl.value);
+            const m = parseInt(exp1PopEl.value);
+            const n = parseInt(exp2PopEl.value);
+
+            if (isNaN(a) || isNaN(m) || isNaN(n) || m < 1 || n < 1 || a < 2) {
+                popAnimationEl.innerHTML = `<p class="text-red-500 font-bold">Bitte gültige Zahlen eingeben (Basis mind. 2, Exponenten mind. 1).</p>`;
+                return;
+            }
+
+            popAnimationEl.innerHTML = `<p class="text-xl font-bold text-yellow-700">Starte Animation...</p>`;
+
+            setTimeout(() => {
+                popAnimationEl.innerHTML = `
+                    <p class="slide-in text-3xl">
+                        (<span class="potenz"><span class="basis">${a}</span><span class="exponent">${m}</span></span>)<span class="exponent">${n}</span>
+                    </p>
+                `;
+            }, 500);
+
+            setTimeout(() => {
+                let innerPotenz = `<span class="potenz"><span class="basis">${a}</span><span class="exponent">${m}</span></span>`;
+                let productN = Array(n).fill(innerPotenz).join(' ⋅ ');
+
+                popAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = ${productN}
+                    </p>
+                `;
+            }, 2000);
+
+            setTimeout(() => {
+                const totalFactors = m * n;
+                const totalA = Array(totalFactors).fill(a).join(' ⋅ ');
+
+                popAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = ${totalA}
+                    </p>
+                `;
+            }, 4000);
+
+            setTimeout(() => {
+                const finalExp = `<span class="highlight-red">${m} ⋅ ${n}</span>`;
+                const finalResult = `<span class="highlight-yellow">${m * n}</span>`;
+
+                popAnimationEl.innerHTML += `
+                    <p class="slide-in mt-6 text-2xl font-bold">
+                        &rArr; <span class="basis">${a}</span><span class="exponent">${finalExp}</span>
+                        = <span class="basis">${a}</span><span class="exponent">${finalResult}</span>
+                    </p>
+                    <p class="slide-in mt-2 text-yellow-700 font-semibold text-lg">
+                        REGEL: Exponenten <span class="highlight-red">multiplizieren</span>!
+                    </p>
+                `;
+            }, 6000);
+        }
+
+        // =========================================================================
+        // Sektion 4: Multiplikation (Gleicher Exponent)
+        // =========================================================================
+        function calculateMultSameExp() {
+            const a = parseInt(base1MultExpEl.value);
+            const b = parseInt(base2MultExpEl.value);
+            const n = parseInt(expMultExp1El.value);
+
+            if (isNaN(a) || isNaN(b) || isNaN(n) || a < 2 || b < 2 || n < 1) {
+                multExpAnimationEl.innerHTML = `<p class="text-red-500 font-bold">Bitte gültige Zahlen eingeben (Basen mindestens 2, Exponent mindestens 1).</p>`;
+                return;
+            }
+
+            multExpAnimationEl.innerHTML = `<p class="text-xl font-bold text-teal-700">Starte Animation...</p>`;
+
+            setTimeout(() => {
+                multExpAnimationEl.innerHTML = `
+                    <p class="slide-in">
+                        <span class="potenz"><span class="basis">${a}</span><span class="exponent">${n}</span></span>
+                        <span class="text-3xl mx-2">⋅</span>
+                        <span class="potenz"><span class="basis">${b}</span><span class="exponent">${n}</span></span>
+                    </p>
+                `;
+            }, 500);
+
+            setTimeout(() => {
+                const productA = Array(n).fill(a).join(' ⋅ ');
+                const productB = Array(n).fill(b).join(' ⋅ ');
+                
+                multExpAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = (${productA}) ⋅ (${productB})
+                    </p>
+                `;
+            }, 2000);
+
+            setTimeout(() => {
+                let pairedFactors = [];
+                for (let i = 0; i < n; i++) {
+                    pairedFactors.push(`<span class="highlight-teal">(${a} ⋅ ${b})</span>`);
+                }
+
+                multExpAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = ${pairedFactors.join(' ⋅ ')}
+                    </p>
+                    <p class="text-gray-500 text-sm mt-1">Die Faktoren wurden umsortiert und gruppiert.</p>
+                `;
+            }, 4000);
+
+            setTimeout(() => {
+                const result = a * b;
+                const finalResult = `<span class="highlight-teal">(${result})</span>`;
+                const finalExp = `<span class="highlight-red">${n}</span>`;
+
+                multExpAnimationEl.innerHTML += `
+                    <p class="slide-in mt-6 text-2xl font-bold">
+                        &rArr; <span class="text-xl mx-0.5">(<span class="basis">${a} ⋅ ${b}</span>)</span><span class="exponent">${finalExp}</span>
+                        = <span class="potenz"><span class="basis">${finalResult}</span><span class="exponent">${finalExp}</span></span>
+                    </p>
+                    <p class="slide-in mt-2 text-teal-700 font-semibold text-lg">
+                        REGEL: Basen <span class="highlight-red">multiplizieren</span> und Exponent beibehalten!
+                    </p>
+                `;
+            }, 6500);
+        }
+        
+        // =========================================================================
+        // Sektion 5: Division (Gleicher Exponent)
+        // =========================================================================
+        function calculateDivSameExp() {
+            const a = parseInt(base1DivExpEl.value);
+            const b = parseInt(base2DivExpEl.value);
+            const n = parseInt(expDivExp1El.value);
+            const result = a / b;
+
+            if (isNaN(a) || isNaN(b) || isNaN(n) || b < 1 || n < 1 || a < 2 || a % b !== 0) {
+                divExpAnimationEl.innerHTML = `<p class="text-red-500 font-bold">Bitte gültige Zahlen eingeben (Basen mindestens 2, Exponent mindestens 1. Achte darauf, dass ${a} durch ${b} teilbar ist).</p>`;
+                return;
+            }
+
+            divExpAnimationEl.innerHTML = `<p class="text-xl font-bold text-sky-700">Starte Animation...</p>`;
+
+            setTimeout(() => {
+                divExpAnimationEl.innerHTML = `
+                    <div class="slide-in flex flex-col items-center">
+                        <span class="potenz text-2xl"><span class="basis">${a}</span><span class="exponent">${n}</span></span>
+                        <div class="h-1 w-20 bg-sky-600 my-1"></div>
+                        <span class="potenz text-2xl"><span class="basis">${b}</span><span class="exponent">${n}</span></span>
+                    </div>
+                `;
+            }, 500);
+
+            setTimeout(() => {
+                const numerator = Array(n).fill(a).join(' ⋅ ');
+                const denominator = Array(n).fill(b).join(' ⋅ ');
+
+                divExpAnimationEl.innerHTML += `
+                    <div class="slide-in flex flex-col items-center mt-4 text-base md:text-lg">
+                        =
+                        <span class="mt-2">${numerator}</span>
+                        <div class="h-1 w-48 bg-gray-400 my-1"></div>
+                        <span>${denominator}</span>
+                    </div>
+                `;
+            }, 2000);
+
+            setTimeout(() => {
+                let fractions = [];
+                for (let i = 0; i < n; i++) {
+                    fractions.push(`(<span class="highlight-teal">${a} / ${b}</span>)`);
+                }
+                
+                divExpAnimationEl.innerHTML += `
+                    <p class="slide-in mt-4 text-base md:text-lg">
+                        = ${fractions.join(' ⋅ ')}
+                    </p>
+                    <p class="text-gray-500 text-sm mt-1">Der Bruch wird in ${n} Einzelbrüche zerlegt.</p>
+                `;
+            }, 4000);
+
+            setTimeout(() => {
+                const finalResult = `<span class="highlight-teal">(${result})</span>`;
+                const finalExp = `<span class="highlight-red">${n}</span>`;
+
+                divExpAnimationEl.innerHTML += `
+                    <p class="slide-in mt-6 text-2xl font-bold">
+                        &rArr; <span class="text-xl mx-0.5">(<span class="basis">${a} / ${b}</span>)</span><span class="exponent">${finalExp}</span>
+                        = <span class="potenz"><span class="basis">${finalResult}</span><span class="exponent">${finalExp}</span></span>
+                    </p>
+                    <p class="slide-in mt-2 text-sky-700 font-semibold text-lg">
+                        REGEL: Basen <span class="highlight-red">dividieren</span> und Exponent beibehalten!
+                    </p>
+                `;
+            }, 6500);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            syncInputs();
+            calculateMultiplication();
+            calculateDivision();
+            calculatePowerOfPower();
+            calculateMultSameExp();
+            calculateDivSameExp();
+        });
+    </script>
+</body>
+</html>
