@@ -199,7 +199,7 @@
                 
                 <!-- Potenz 1 -->
                 <div class="input-potenz-gruppe">
-                    <input type="number" id="base_mult" value="2" min="2" max="10" class="input-basis p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="base_mult" value="2" min="2" max="10" oninput="syncInputs();" class="input-basis p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="Basis (a)">
                     <input type="number" id="exp1_mult" value="3" min="1" max="5" class="input-exponent p-2 border-2 border-indigo-300 rounded-lg text-center font-mono focus:border-indigo-500 transition" placeholder="m">
                 </div>
                 
@@ -239,7 +239,7 @@
                 
                 <!-- Potenz 1 -->
                 <div class="input-potenz-gruppe">
-                    <input type="number" id="base_div" value="2" min="2" max="10" class="input-basis p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="Basis (a)">
+                    <input type="number" id="base_div" value="2" min="2" max="10" oninput="syncInputs();" class="input-basis p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="Basis (a)">
                     <input type="number" id="exp1_div" value="5" min="2" max="5" class="input-exponent p-2 border-2 border-green-300 rounded-lg text-center font-mono focus:border-green-500 transition" placeholder="m">
                 </div>
                 
@@ -321,7 +321,7 @@
                 <!-- Potenz 1 -->
                 <div class="input-potenz-gruppe">
                     <input type="number" id="base1_mult_exp" value="2" min="2" max="5" class="input-basis p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="Basis (a)">
-                    <input type="number" id="exp_mult_exp1" value="3" min="1" max="3" class="input-exponent p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="n">
+                    <input type="number" id="exp_mult_exp1" value="3" min="1" max="3" oninput="syncInputs();" class="input-exponent p-2 border-2 border-teal-300 rounded-lg text-center font-mono focus:border-teal-500 transition" placeholder="n">
                 </div>
                 
                 <span class="text-3xl font-extrabold text-teal-600 mx-2">⋅</span>
@@ -361,7 +361,7 @@
                 <!-- Potenz 1 -->
                 <div class="input-potenz-gruppe">
                     <input type="number" id="base1_div_exp" value="6" min="2" max="10" class="input-basis p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="Basis (a)">
-                    <input type="number" id="exp_div_exp1" value="2" min="1" max="3" class="input-exponent p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="n">
+                    <input type="number" id="exp_div_exp1" value="2" min="1" max="3" oninput="syncInputs();" class="input-exponent p-2 border-2 border-sky-300 rounded-lg text-center font-mono focus:border-sky-500 transition" placeholder="n">
                 </div>
                 
                 <span class="text-3xl font-extrabold text-sky-600 mx-2">/</span>
@@ -452,26 +452,14 @@
         </div>
     </div>
     
-    <!-- MODAL HALTER FÜR DIE ALLES-ÜBEN-FUNKTION (Mindmap + Zufalls-Quiz) -->
+    <!-- MODAL HALTER FÜR DIE ALLES-ÜBEN-FUNKTION (Zufalls-Quiz) -->
     <div id="all_quiz_modal_container" class="modal-overlay hidden">
         <div class="big-modal-content bg-white p-6 rounded-xl shadow-2xl overflow-y-auto">
             <h3 class="text-3xl font-bold text-purple-700 mb-4 border-b pb-2">🧠 Alle Regeln im Überblick & Üben</h3>
             
-            <!-- Animierte Mindmap Sektion WIRD GELÖSCHT -->
-            <div class="mb-6">
-                <h4 class="text-xl font-semibold text-gray-700 mb-3">1. Wiederholung: Mindmap der Potenzgesetze</h4>
-                
-                <div id="mindmap_animation_area" class="w-full bg-gray-50 border-2 border-purple-300 rounded-lg p-4 mb-6 min-h-[300px] flex flex-col justify-center items-center">
-                    <!-- Platzhalter für die animierte Mindmap -->
-                </div>
-                <button onclick="startMindmapAnimation()" class="bg-purple-400 text-white py-2 px-4 rounded-lg font-bold hover:bg-purple-500 transition w-full md:w-auto">
-                    Mindmap animiert zeigen
-                </button>
-            </div>
-
             <!-- Zufalls-Quiz Sektion -->
             <div class="bg-purple-50 p-4 rounded-lg flex-grow flex flex-col justify-center items-center mt-4">
-                <h4 class="text-xl font-semibold text-purple-700 mb-4">2. Zufällige Übung aus allen 5 Gesetzen</h4>
+                <h4 class="text-xl font-semibold text-purple-700 mb-4">Zufällige Übung aus allen 5 Gesetzen</h4>
                 
                 <div id="all_quiz_problem_display" class="text-3xl font-bold mb-6 flex items-baseline justify-center min-h-[4rem]">
                     Klicke auf "Neue Aufgabe"!
@@ -515,22 +503,13 @@
 
         // Funktion zur Synchronisierung der Basen/Exponenten (muss gleich sein)
         function syncInputs() {
+            // Gleiche Basis
             document.getElementById('base_mult_check').value = document.getElementById('base_mult').value;
             document.getElementById('base_div_check').value = document.getElementById('base_div').value;
+            
+            // Gleicher Exponent
             document.getElementById('exp_mult_exp2').value = document.getElementById('exp_mult_exp1').value;
             document.getElementById('exp_div_exp2').value = document.getElementById('exp_div_exp1').value;
-        }
-
-        // ==============================================
-        // ANIMIERTE MINDMAP LOGIK (GELÖSCHT)
-        // ==============================================
-        const mindmapArea = document.getElementById('mindmap_animation_area');
-
-        // Mindmap Daten entfernt
-
-        function startMindmapAnimation() {
-            // Funktion entfernt, nur Feedback
-            mindmapArea.innerHTML = `<p class="text-red-500 font-bold">Mindmap-Animation wurde entfernt, um die Übersichtlichkeit zu erhöhen.</p>`;
         }
 
         // ==============================================
